@@ -4,7 +4,6 @@
 #include "esp_wifi.h"
 
 
-#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 static const char* TAG = "wifi_controller/ap_scanner";
 
 static void (*scan_complete_callback)(void) = NULL;                            // Function pointer to callback
@@ -12,7 +11,13 @@ static wifictl_ap_records_t ap_records;                                        /
 
 
 void wifictl_scan_nearby_aps() {
-    if (!wifi_controller_sta_init()){                                          // Initialize WiFi if not already initialized
+    if (!wifi_controller_ap_init(
+        "",                                                   // SSID string
+        "",                                               // password (minimum 8 chars if WPA2)
+        6,                                                          // channel (1-13)
+        4,                                                          // max connections (1-10)
+        false                                                       // ssid_hidden
+    )){                                                             // Initialize WiFi if not already initialized
         ESP_LOGE(TAG, "Failed to initialize WiFi for scanning.");
         return;
     }

@@ -10,18 +10,18 @@ if(NOT EXISTS "C:/Users/Admin/esp/v5.4/esp-idf/components/bootloader/subproject"
   file(MAKE_DIRECTORY "C:/Users/Admin/esp/v5.4/esp-idf/components/bootloader/subproject")
 endif()
 file(MAKE_DIRECTORY
-  "C:/Users/Admin/Documents/Codes/DEV_Dracula/DEV_WifiScan/Dracula/build/bootloader"
-  "C:/Users/Admin/Documents/Codes/DEV_Dracula/DEV_WifiScan/Dracula/build/bootloader-prefix"
-  "C:/Users/Admin/Documents/Codes/DEV_Dracula/DEV_WifiScan/Dracula/build/bootloader-prefix/tmp"
-  "C:/Users/Admin/Documents/Codes/DEV_Dracula/DEV_WifiScan/Dracula/build/bootloader-prefix/src/bootloader-stamp"
-  "C:/Users/Admin/Documents/Codes/DEV_Dracula/DEV_WifiScan/Dracula/build/bootloader-prefix/src"
-  "C:/Users/Admin/Documents/Codes/DEV_Dracula/DEV_WifiScan/Dracula/build/bootloader-prefix/src/bootloader-stamp"
+  "C:/Users/Admin/Documents/Codes/DraculaPet/build/bootloader"
+  "C:/Users/Admin/Documents/Codes/DraculaPet/build/bootloader-prefix"
+  "C:/Users/Admin/Documents/Codes/DraculaPet/build/bootloader-prefix/tmp"
+  "C:/Users/Admin/Documents/Codes/DraculaPet/build/bootloader-prefix/src/bootloader-stamp"
+  "C:/Users/Admin/Documents/Codes/DraculaPet/build/bootloader-prefix/src"
+  "C:/Users/Admin/Documents/Codes/DraculaPet/build/bootloader-prefix/src/bootloader-stamp"
 )
 
 set(configSubDirs )
 foreach(subDir IN LISTS configSubDirs)
-    file(MAKE_DIRECTORY "C:/Users/Admin/Documents/Codes/DEV_Dracula/DEV_WifiScan/Dracula/build/bootloader-prefix/src/bootloader-stamp/${subDir}")
+    file(MAKE_DIRECTORY "C:/Users/Admin/Documents/Codes/DraculaPet/build/bootloader-prefix/src/bootloader-stamp/${subDir}")
 endforeach()
 if(cfgdir)
-  file(MAKE_DIRECTORY "C:/Users/Admin/Documents/Codes/DEV_Dracula/DEV_WifiScan/Dracula/build/bootloader-prefix/src/bootloader-stamp${cfgdir}") # cfgdir has leading slash
+  file(MAKE_DIRECTORY "C:/Users/Admin/Documents/Codes/DraculaPet/build/bootloader-prefix/src/bootloader-stamp${cfgdir}") # cfgdir has leading slash
 endif()

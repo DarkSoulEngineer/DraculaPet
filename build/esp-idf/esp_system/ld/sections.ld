@@ -1,6 +1,6 @@
 /* Automatically generated file; DO NOT EDIT */
 /* Espressif IoT Development Framework Linker Script */
-/* Generated from: C:\Users\Admin\Documents\Codes\DEV_Dracula\DEV_WifiScan\Dracula\build\esp-idf\esp_system\ld\sections.ld.in */
+/* Generated from: C:\Users\Admin\Documents\Codes\DraculaPet\build\esp-idf\esp_system\ld\sections.ld.in */
 
 /*
 

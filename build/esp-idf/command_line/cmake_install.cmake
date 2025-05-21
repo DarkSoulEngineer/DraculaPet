@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/Admin/Documents/Codes/DEV_Dracula/DEV_WifiScan/Dracula/components/command_line
+# Install script for directory: C:/Users/Admin/Documents/Codes/DraculaPet/components/command_line
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

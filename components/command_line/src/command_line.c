@@ -79,11 +79,11 @@ void read_uart(void *arg) {
                     } else {            
                         printf("Invalid state: %d\n", *state);                      // Print error message
                         // ESP_LOGI(TAG, "Invalid state: %d", *state);          
-                    }           
+                    }
                     index = 0;                                                      // Reset buffer
                     memset(buffer, 0, sizeof(buffer));                              // Clear buffer
-                }           
-            }           
+                }
+            }
             else {          
                 buffer[index++] = ch;                                               // Add character to buffer
                 uart_write_bytes(UART_NUM, &ch, 1);                                 // Echo character to terminal
