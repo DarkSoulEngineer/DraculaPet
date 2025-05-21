@@ -11,21 +11,17 @@ static wifictl_ap_records_t ap_records;                                        /
 
 
 void wifictl_scan_nearby_aps() {
-    if (!wifi_controller_ap_init(
-        "",                                                   // SSID string
-        "",                                               // password (minimum 8 chars if WPA2)
-        6,                                                          // channel (1-13)
-        4,                                                          // max connections (1-10)
-        false                                                       // ssid_hidden
-    )){                                                             // Initialize WiFi if not already initialized
-        ESP_LOGE(TAG, "Failed to initialize WiFi for scanning.");
+    esp_err_t err = wifi_controller_sta_init();
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize WiFi STA: %s", esp_err_to_name(err));
         return;
     }
 
     ESP_LOGD(TAG, "Scanning nearby APs...");
     ap_records.count = CONFIG_SCAN_MAX_AP;                                     // Initialize count to CONFIG_SCAN_MAX_AP
 
-    wifi_scan_config_t scan_config = {
+    wifi_scan_config_t scan_config = 
+    {
         .ssid = NULL                               ,                           // NULL to scan all SSIDs
         .bssid = NULL                              ,                           // NULL to scan all BSSIDs
         .channel = 0                               ,                           // 0 to scan all channels
@@ -34,7 +30,7 @@ void wifictl_scan_nearby_aps() {
         .scan_time.active = {.min = 120, .max = 150}                           // Scan time range in milliseconds
     };
 
-    esp_err_t err = esp_wifi_scan_start(&scan_config, true);                   // Start scan
+    err = esp_wifi_scan_start(&scan_config, true);                   // Start scan
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "WiFi scan failed: %s", esp_err_to_name(err));
         return;

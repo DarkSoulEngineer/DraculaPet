@@ -34,4 +34,18 @@ esp_err_t wifi_controller_ap_init(const char* ssid, const char* password,
  */
 esp_err_t wifi_controller_ap_deinit(void);
 
+/**
+ * @brief Initialize and start WiFi Station Mode
+ * 
+ * @return esp_err_t  ESP_OK on success, error code otherwise
+ */
+esp_err_t wifi_controller_sta_init();
+
+/**
+ * @brief Deinitialize and start WiFi Station Mode
+ * 
+ * @return esp_err_t  ESP_OK on success, error code otherwise
+ */
+esp_err_t wifi_controller_sta_deinit(void);
+
 #endif // WIFI_CONTROLLER_H
