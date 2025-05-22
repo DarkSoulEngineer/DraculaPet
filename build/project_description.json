@@ -1,7 +1,7 @@
 {
     "version":            "1.1",
     "project_name":       "Dracula",
-    "project_version":    "v1.0.1-1-gdf72251-dirty",
+    "project_version":    "7567aed-dirty",
     "project_path":       "C:/Users/Admin/Documents/Codes/DraculaPet",
     "idf_path":           "C:/Users/Admin/esp/v5.4/esp-idf",
     "build_dir":          "C:/Users/Admin/Documents/Codes/DraculaPet/build",
@@ -1550,12 +1550,12 @@
             "dir": "C:/Users/Admin/Documents/Codes/DraculaPet/components/wifi_controller",
             "type": "LIBRARY",
             "lib": "__idf_wifi_controller",
-            "reqs": [ "nvs_flash", "esp_wifi" ],
+            "reqs": [ "esp_eth", "esp_netif", "nvs_flash", "esp_wifi" ],
             "priv_reqs": [],
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "file": "C:/Users/Admin/Documents/Codes/DraculaPet/build/esp-idf/wifi_controller/libwifi_controller.a",
-            "sources": [ "C:/Users/Admin/Documents/Codes/DraculaPet/components/wifi_controller/src/wifi_controller.c", "C:/Users/Admin/Documents/Codes/DraculaPet/components/wifi_controller/src/ap_scanner.c" ],
+            "sources": [ "C:/Users/Admin/Documents/Codes/DraculaPet/components/wifi_controller/src/wifi_controller.c", "C:/Users/Admin/Documents/Codes/DraculaPet/components/wifi_controller/src/ap_scanner.c", "C:/Users/Admin/Documents/Codes/DraculaPet/components/wifi_controller/src/event_handler.c" ],
             "include_dirs": [ ".", "include" ]
         },
         "wifi_provisioning": {
@@ -2895,7 +2895,7 @@
             "prefix": "idf",
             "dir": "C:/Users/Admin/Documents/Codes/DraculaPet/components/wifi_controller",
             "lib": "__idf_wifi_controller",
-            "reqs": [ "nvs_flash", "esp_wifi" ],
+            "reqs": [ "esp_eth", "esp_netif", "nvs_flash", "esp_wifi" ],
             "priv_reqs": [],
             "managed_reqs": [],
             "managed_priv_reqs": [],

@@ -1,4 +1,5 @@
 #include "wifi_controller.h"
+#include "event_handler.h"
 
 #include <string.h>
 #include "esp_wifi.h"
@@ -13,49 +14,16 @@ static const char* TAG = "wifi_controller";
 
 static SemaphoreHandle_t wifi_mutex = NULL;
 static bool wifi_initialized = false;
+
 static esp_event_handler_instance_t wifi_sta_event_instance = NULL;
+static esp_event_handler_instance_t ip_event_instance = NULL;
 
-
-// Helper function to log MAC address as string "xx:xx:xx:xx:xx:xx"
-void mac_address_to_str(const uint8_t* mac, char* str, size_t str_len) {
-    if (!mac || !str || str_len < 18) { // 17 chars + null terminator
-        if (str && str_len > 0) str[0] = '\0';
-        return;
-    }
-    snprintf(str, str_len, "%02x:%02x:%02x:%02x:%02x:%02x",
-             mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-}
-
-static void wifi_event_handler(void* arg, esp_event_base_t event_base,
-                               int32_t event_id, void* event_data)
-{
-    if (event_base != WIFI_EVENT) {
-        return;
-    }
-
-    switch (event_id) {
-        case WIFI_EVENT_AP_START:
-            ESP_LOGI(TAG, "WiFi AP started");
-            break;
-        case WIFI_EVENT_AP_STACONNECTED: {
-            wifi_event_ap_staconnected_t* evt = (wifi_event_ap_staconnected_t*) event_data;
-            mac_address_to_str(evt->mac, (char*)event_data, sizeof(wifi_event_ap_staconnected_t));
-            break;
-        }
-        case WIFI_EVENT_AP_STADISCONNECTED: {
-            wifi_event_ap_stadisconnected_t* evt = (wifi_event_ap_stadisconnected_t*) event_data;
-            mac_address_to_str(evt->mac, (char*)event_data, sizeof(wifi_event_ap_stadisconnected_t));
-            break;
-        }
-        default:
-            ESP_LOGD(TAG, "Event ID: %d", (int)event_id);
-            break;
-    }
-}
 
 esp_err_t wifi_controller_ap_init(const char* ssid, const char* password,
                                  uint8_t channel, uint8_t max_conn, bool ssid_hidden)
 {
+    esp_err_t err;
+
     if (!ssid || strlen(ssid) == 0 || strlen(ssid) > 32) {
         ESP_LOGE(TAG, "Invalid SSID");
         return ESP_ERR_INVALID_ARG;
@@ -80,13 +48,14 @@ esp_err_t wifi_controller_ap_init(const char* ssid, const char* password,
         return ESP_OK;
     }
 
-    if (password && strlen(password) > 0 && strlen(password) < 8) {
+    size_t pass_len = password ? strlen(password) : 0;
+    if (pass_len > 0 && pass_len < 8) {
         ESP_LOGE(TAG, "Password too short for WPA2 (minimum 8 characters)");
         xSemaphoreGive(wifi_mutex);
         return ESP_ERR_INVALID_ARG;
     }
 
-    esp_err_t err = nvs_flash_init();
+    err = nvs_flash_init();
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_ERROR_CHECK(nvs_flash_erase());
         err = nvs_flash_init();
@@ -121,7 +90,9 @@ esp_err_t wifi_controller_ap_init(const char* ssid, const char* password,
         return err;
     }
 
-    err = esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, wifi_event_handler, NULL, &wifi_sta_event_instance);
+    // Register event handler for AP mode if needed
+    err = esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID,
+                                              wifi_event_handler, NULL, &wifi_sta_event_instance);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Failed to register WiFi event handler: %s", esp_err_to_name(err));
         esp_wifi_deinit();
@@ -141,11 +112,12 @@ esp_err_t wifi_controller_ap_init(const char* ssid, const char* password,
         }
     };
 
-    strncpy((char*)wifi_config.ap.ssid, ssid, sizeof(wifi_config.ap.ssid));
-    wifi_config.ap.ssid_len = strlen(ssid);
+    strncpy((char*)wifi_config.ap.ssid, ssid, sizeof(wifi_config.ap.ssid) - 1);
+    wifi_config.ap.ssid[sizeof(wifi_config.ap.ssid) - 1] = '\0';
 
     if (password && strlen(password) > 0) {
-        strncpy((char*)wifi_config.ap.password, password, sizeof(wifi_config.ap.password));
+        strncpy((char*)wifi_config.ap.password, password, sizeof(wifi_config.ap.password) - 1);
+        wifi_config.ap.password[sizeof(wifi_config.ap.password) - 1] = '\0';
         wifi_config.ap.authmode = WIFI_AUTH_WPA2_PSK;
     } else {
         wifi_config.ap.authmode = WIFI_AUTH_OPEN;
@@ -269,9 +241,24 @@ esp_err_t wifi_controller_sta_init(void)
         return err;
     }
 
-    err = esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, wifi_event_handler, NULL, &wifi_sta_event_instance);
+    // IMPORTANT: assign the return value to err to check if registration succeeded!
+    err = esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID,
+                                              wifi_event_handler, NULL, &wifi_sta_event_instance);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Failed to register WiFi event handler: %s", esp_err_to_name(err));
+        esp_wifi_deinit();
+        return err;
+    }
+
+    // Also register IP event handler for IP_EVENT_STA_GOT_IP if you want to handle IP events
+    err = esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_GOT_IP,
+                                              wifi_event_handler, NULL, &ip_event_instance);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to register IP event handler: %s", esp_err_to_name(err));
+        if (wifi_sta_event_instance) {
+            esp_event_handler_instance_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, wifi_sta_event_instance);
+            wifi_sta_event_instance = NULL;
+        }
         esp_wifi_deinit();
         return err;
     }
@@ -297,6 +284,10 @@ cleanup:
     if (wifi_sta_event_instance) {
         esp_event_handler_instance_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, wifi_sta_event_instance);
         wifi_sta_event_instance = NULL;
+    }
+    if (ip_event_instance) {
+        esp_event_handler_instance_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, ip_event_instance);
+        ip_event_instance = NULL;
     }
     esp_wifi_deinit();
     return err;
